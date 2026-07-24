@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>EXP Lane — Mobile Legends: Bang Bang</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0A0F1C;
+    --panel: #121B2E;
+    --panel-edge: #1D2A42;
+    --teal: #2ED9C3;
+    --gold: #F0C24B;
+    --danger: #FF6B4A;
+    --text: #E8EDF5;
+    --text-dim: #8B98B3;
+  }
+  *{ box-sizing: border-box; margin:0; padding:0; }
+  html,body{ background: var(--bg); color: var(--text); font-family:'Inter',sans-serif; overflow-x:hidden; }
+  ::selection{ background: var(--teal); color:#06110F; }
+
+  .noise{
+    position:fixed; inset:0; pointer-events:none; opacity:.035; z-index:1;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  header{ position:relative; z-index:2; padding:64px 24px 28px; text-align:center; }
+  .eyebrow{ font-family:'JetBrains Mono',monospace; letter-spacing:.28em; font-size:12px; color:var(--teal); text-transform:uppercase; }
+  h1{
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:clamp(42px,8vw,84px);
+    letter-spacing:.02em; line-height:1; margin-top:10px;
+    background:linear-gradient(180deg,#FFFFFF 0%,var(--teal) 120%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .subtitle{ max-width:640px; margin:18px auto 0; color:var(--text-dim); font-size:16px; line-height:1.6; }
+
+  /* ===== 3D SCENE — diagonal battlefield, corner bases ===== */
+  .scene-wrap{
+    position:relative; z-index:2; height:min(82vh,680px); margin:20px auto 8px;
+    display:flex; align-items:center; justify-content:center; perspective:1600px;
+  }
+  .stage{
+    width:720px; max-width:92vw; height:720px; max-height:92vw;
+    position:relative; transform-style:preserve-3d;
+    transform:rotateX(55deg) rotateZ(45deg);
+    transition:transform .15s ease-out;
+  }
+  .board{
+    position:absolute; inset:0; border-radius:22px;
+    background:
+      radial-gradient(circle at 15% 85%, rgba(46,217,195,.10), transparent 42%),
+      radial-gradient(circle at 85% 15%, rgba(255,107,74,.10), transparent 42%),
+      linear-gradient(135deg,#2A3B22 0%,#34492A 45%,#3B5230 100%);
+    border:6px solid #17240F;
+    box-shadow:0 0 90px rgba(0,0,0,.6) inset;
+  }
+
+  /* diagonal river, corner to corner-ish through middle */
+  .river{
+    position:absolute; left:8%; right:8%; top:44%; height:12%;
+    background:linear-gradient(90deg,#123047,#1B4A66 50%,#123047);
+    box-shadow:0 0 40px rgba(46,217,195,.25) inset;
+    transform:rotateZ(-45deg) translateZ(6px);
+    border-radius:40px;
+  }
+
+  /* EXP lane path — runs along the top-left edge, corner to corner */
+  .exp-lane{
+    position:absolute; width:15%; height:120%;
+    left:6%; top:-10%;
+    background:linear-gradient(180deg, rgba(240,194,75,.10), rgba(46,217,195,.14));
+    transform:rotateZ(45deg) translateZ(4px);
+    transform-origin:top center;
+    border-left:2px dashed rgba(240,194,75,.4);
+    border-right:2px dashed rgba(240,194,75,.4);
+  }
+
+  /* gold lane path, dimmer — mirrored edge */
+  .gold-lane{
+    position:absolute; width:15%; height:120%;
+    right:6%; top:-10%;
+    background:linear-gradient(180deg, rgba(255,107,74,.06), rgba(46,217,195,.06));
+    transform:rotateZ(-45deg) translateZ(4px);
+    transform-origin:top center;
+    border-left:2px dashed rgba(255,255,255,.12);
+    border-right:2px dashed rgba(255,255,255,.12);
+    opacity:.55;
+  }
+
+  .grass{
+    position:absolute; width:70px; height:70px; border-radius:10px;
+    background:radial-gradient(ellipse at 50% 50%,#2E5232,#1D3A20 70%);
+    box-shadow:0 0 0 2px rgba(46,217,195,.15) inset;
+    transform:translateZ(3px);
+  }
+  .g1{ left:18%; top:16%; } .g2{ left:30%; top:8%; }
+  .g3{ left:8%; top:38%; }  .g4{ left:60%; top:74%; }
+  .g5{ left:70%; top:60%; } .g6{ left:78%; top:82%; }
+
+  .base{
+    position:absolute; width:120px; height:120px; border-radius:50%;
+    transform:translateZ(14px);
+  }
+  .base.blue{ left:-6%; bottom:-6%; background:radial-gradient(circle,rgba(46,217,195,.5),transparent 70%); }
+  .base.red{ right:-6%; top:-6%; background:radial-gradient(circle,rgba(255,107,74,.5),transparent 70%); }
+  .base-label{
+    position:absolute; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.08em;
+    transform:translateZ(16px);
+  }
+  .base-label.blue{ left:-2%; bottom:2%; color:var(--teal); }
+  .base-label.red{ right:-2%; top:2%; color:var(--danger); }
+
+  .turret{
+    position:absolute; width:34px; height:34px; transform-style:preserve-3d; transform:translateZ(30px);
+  }
+  .turret .body{
+    width:100%; height:100%; border-radius:6px;
+    background:linear-gradient(145deg,#3A4A6B,#1C2740);
+    border:2px solid var(--gold);
+    box-shadow:0 0 18px rgba(240,194,75,.45),0 14px 0 -5px rgba(0,0,0,.5);
+  }
+  .turret.enemy .body{ border-color:var(--danger); box-shadow:0 0 18px rgba(255,107,74,.45),0 14px 0 -5px rgba(0,0,0,.5); }
+  .turret .label{
+    position:absolute; top:-22px; left:50%; transform:translateX(-50%);
+    font-family:'JetBrains Mono',monospace; font-size:8px; color:var(--gold); white-space:nowrap;
+  }
+  .turret.enemy .label{ color:var(--danger); }
+
+  /* EXP lane turrets — placed along the true diagonal edge, corner to corner */
+  .et1{ left:16%; bottom:24%; }
+  .et2{ left:23%; bottom:37%; }
+  .eti{ left:30%; bottom:50%; }
+  .er1{ left:64%; top:24%; }
+  .er2{ left:57%; top:37%; }
+  .eri{ left:50%; top:50%; }
+
+  /* jungle monster camps, one pocket per side */
+  .camp{
+    position:absolute; width:26px; height:26px; border-radius:50%; transform:translateZ(16px);
+    background:radial-gradient(circle at 35% 30%,#C9A6FF,#6B3FA0 65%);
+    box-shadow:0 0 14px rgba(155,110,230,.55),0 10px 6px -5px rgba(0,0,0,.5);
+  }
+  .camp.c1{ left:34%; top:70%; }
+  .camp.c2{ left:66%; top:20%; }
+
+  /* animated minion wave crawling toward the enemy turret */
+  .wave{ position:absolute; left:20%; bottom:20%; width:14px; height:14px; transform-style:preserve-3d; }
+  .wave .unit{
+    position:absolute; width:10px; height:10px; border-radius:50%; transform:translateZ(12px);
+    background:radial-gradient(circle,#9AF0E2,#1D9C8A);
+    box-shadow:0 0 8px rgba(46,217,195,.6);
+    animation: march 6s linear infinite;
+  }
+  .wave .unit:nth-child(2){ animation-delay:-1s; }
+  .wave .unit:nth-child(3){ animation-delay:-2s; }
+  @keyframes march{
+    0%{ left:0%; bottom:0%; }
+    100%{ left:44%; bottom:44%; }
+  }
+
+  .turtle-marker, .jungle-marker, .lord-marker{
+    position:absolute; width:56px; height:56px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    font-family:'JetBrains Mono',monospace; font-size:8px; transform:translateZ(10px);
+  }
+  .turtle-marker{
+    left:24%; top:60%; color:var(--gold);
+    background:radial-gradient(circle,rgba(240,194,75,.25),rgba(240,194,75,.05));
+    border:1px dashed rgba(240,194,75,.5);
+  }
+  .lord-marker{
+    left:60%; top:28%; color:var(--danger);
+    background:radial-gradient(circle,rgba(255,107,74,.22),rgba(255,107,74,.05));
+    border:1px dashed rgba(255,107,74,.5);
+  }
+  .jungle-marker{
+    left:12%; top:60%; color:var(--teal);
+    background:radial-gradient(circle,rgba(46,217,195,.2),rgba(46,217,195,.05));
+    border:1px dashed rgba(46,217,195,.5);
+  }
+
+  .hero-pin{
+    position:absolute; left:22%; bottom:34%; width:30px; height:30px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,#FFEBB8,var(--gold) 60%,#7A5B12);
+    box-shadow:0 0 22px rgba(240,194,75,.7),0 18px 8px -6px rgba(0,0,0,.6);
+    transform:translateZ(44px);
+    animation:float 3s ease-in-out infinite; cursor:pointer;
+  }
+  @keyframes float{ 0%,100%{ transform:translateZ(44px);} 50%{ transform:translateZ(64px);} }
+
+  .compass{
+    position:absolute; left:50%; top:-40px; transform:translateX(-50%) translateZ(2px);
+    font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-dim); letter-spacing:.15em;
+  }
+
+  .hint{
+    position:relative; z-index:2; text-align:center; font-family:'JetBrains Mono',monospace; font-size:11px;
+    color:var(--text-dim); letter-spacing:.1em; margin-top:-6px; margin-bottom:36px;
+  }
+  .legend{
+    position:relative; z-index:2; display:flex; gap:20px; justify-content:center; flex-wrap:wrap;
+    font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); margin-bottom:8px;
+  }
+  .legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .dot{ width:9px; height:9px; border-radius:50%; display:inline-block; }
+  .dot.gold{ background:var(--gold); box-shadow:0 0 6px var(--gold); }
+  .dot.danger{ background:var(--danger); box-shadow:0 0 6px var(--danger); }
+  .dot.teal{ background:var(--teal); box-shadow:0 0 6px var(--teal); }
+
+  main{ position:relative; z-index:2; max-width:1080px; margin:0 auto; padding:20px 24px 100px; }
+  .section-head{ display:flex; align-items:baseline; gap:14px; margin:64px 0 22px; }
+  .section-head .num{ font-family:'JetBrains Mono',monospace; color:var(--teal); font-size:13px; }
+  .section-head h2{ font-family:'Rajdhani',sans-serif; font-weight:700; font-size:28px; letter-spacing:.01em; }
+  .section-head .rule{ flex:1; height:1px; background:var(--panel-edge); }
+
+  .grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:16px; }
+  .card{ background:var(--panel); border:1px solid var(--panel-edge); border-radius:10px; padding:20px; position:relative; overflow:hidden; }
+  .card::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--teal); }
+  .card h3{ font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; margin-bottom:8px; color:var(--gold); }
+  .card p{ font-size:14px; line-height:1.6; color:var(--text-dim); }
+
+  .timeline{ display:flex; flex-direction:column; border-left:2px solid var(--panel-edge); margin-left:8px; }
+  .tl-item{ position:relative; padding:0 0 30px 26px; }
+  .tl-item::before{ content:''; position:absolute; left:-7px; top:2px; width:12px; height:12px; border-radius:50%; background:var(--bg); border:2px solid var(--teal); }
+  .tl-item .time{ font-family:'JetBrains Mono',monospace; color:var(--teal); font-size:12px; letter-spacing:.05em; }
+  .tl-item h4{ font-family:'Rajdhani',sans-serif; font-size:18px; margin:4px 0 6px; }
+  .tl-item p{ font-size:14px; color:var(--text-dim); line-height:1.6; max-width:620px; }
+
+  .hero-list{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
+  .hero-chip{
+    background:var(--panel); border:1px solid var(--panel-edge); border-radius:8px;
+    padding:12px 14px; text-align:left; width:100%; cursor:pointer;
+    font-family:inherit; color:inherit;
+    transition:border-color .15s ease, transform .15s ease, background .15s ease;
+  }
+  .hero-chip:hover{ border-color:var(--teal); transform:translateY(-2px); }
+  .hero-chip:focus-visible{ outline:2px solid var(--teal); outline-offset:2px; }
+  .hero-chip.active{ border-color:var(--gold); background:#17223A; }
+  .hero-chip .role{ font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--teal); letter-spacing:.08em; text-transform:uppercase; }
+  .hero-chip .name{ font-family:'Rajdhani',sans-serif; font-weight:700; font-size:17px; margin-top:2px; }
+
+  .hero-detail{
+    margin-top:16px; background:var(--panel); border:1px solid var(--panel-edge); border-radius:12px;
+    padding:0; max-height:0; opacity:0; overflow:hidden;
+    transition:max-height .35s ease, opacity .3s ease, padding .35s ease;
+  }
+  .hero-detail.open{ max-height:600px; opacity:1; padding:26px; }
+  .hero-detail-top{ display:flex; align-items:center; gap:16px; margin-bottom:18px; }
+  .hero-avatar{
+    width:56px; height:56px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:22px; color:#0A0F1C;
+    background:radial-gradient(circle at 35% 30%,#FFEBB8,var(--gold) 60%,#7A5B12);
+    box-shadow:0 0 18px rgba(240,194,75,.5);
+  }
+  .hero-detail-top h3{ font-family:'Rajdhani',sans-serif; font-size:26px; font-weight:700; }
+  .hero-detail-top .role-tag{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--teal); letter-spacing:.08em; text-transform:uppercase; }
+  .hero-detail-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:20px; }
+  .hero-detail-block h4{
+    font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; margin-bottom:8px;
+  }
+  .hero-detail-block.why h4{ color:var(--teal); }
+  .hero-detail-block.nerf h4{ color:var(--danger); }
+  .hero-detail-block p{ font-size:14px; line-height:1.65; color:var(--text-dim); }
+  .hero-detail-note{
+    margin-top:18px; padding-top:14px; border-top:1px dashed var(--panel-edge);
+    font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); letter-spacing:.02em;
+  }
+
+  footer{ position:relative; z-index:2; text-align:center; padding:40px 20px 60px; color:var(--text-dim); font-size:12px; font-family:'JetBrains Mono',monospace; }
+
+  @media (prefers-reduced-motion:reduce){ .stage{ transition:none; } .hero-pin{ animation:none; } }
+</style>
+</head>
+<body>
+<div class="noise"></div>
+
+<header>
+  <div class="eyebrow">Mobile Legends: Bang Bang — Map Study, v2</div>
+  <h1>THE EXP LANE</h1>
+  <p class="subtitle">Redrawn to match the real battlefield: bases sit in opposite corners, the river cuts diagonally through the jungle, and the EXP lane runs the outer edge connecting them. Tilt with your mouse to look across the map.</p>
+</header>
+
+<div class="legend">
+  <span><i class="dot teal"></i> Blue side (bottom-left base)</span>
+  <span><i class="dot danger"></i> Red side (top-right base)</span>
+  <span><i class="dot gold"></i> EXP lane turrets</span>
+</div>
+
+<div class="scene-wrap" id="sceneWrap">
+  <div class="stage" id="stage">
+    <div class="board">
+      <div class="compass">N ↑ EXP LANE EDGE</div>
+      <div class="river"></div>
+      <div class="exp-lane"></div>
+      <div class="gold-lane"></div>
+
+      <div class="grass g1"></div>
+      <div class="grass g2"></div>
+      <div class="grass g3"></div>
+      <div class="grass g4"></div>
+      <div class="grass g5"></div>
+      <div class="grass g6"></div>
+
+      <div class="base blue"></div>
+      <div class="base red"></div>
+      <div class="base-label blue">BLUE BASE</div>
+      <div class="base-label red">RED BASE</div>
+
+      <div class="turret et1"><div class="label">TOWER 1</div><div class="body"></div></div>
+      <div class="turret et2"><div class="label">TOWER 2</div><div class="body"></div></div>
+      <div class="turret eti"><div class="label">INHIBITOR</div><div class="body"></div></div>
+
+      <div class="turret enemy er1"><div class="label">TOWER 1</div><div class="body"></div></div>
+      <div class="turret enemy er2"><div class="label">TOWER 2</div><div class="body"></div></div>
+      <div class="turret enemy eri"><div class="label">INHIBITOR</div><div class="body"></div></div>
+
+      <div class="turtle-marker">TURTLE</div>
+      <div class="lord-marker">LORD</div>
+      <div class="jungle-marker">JUNGLE<br>BUFF</div>
+      <div class="camp c1" title="Jungle monster camp"></div>
+      <div class="camp c2" title="Jungle monster camp"></div>
+
+      <div class="wave">
+        <div class="unit"></div>
+        <div class="unit"></div>
+        <div class="unit"></div>
+      </div>
+
+      <div class="hero-pin" title="Exp Laner"></div>
+    </div>
+  </div>
+</div>
+<p class="hint">↕ MOUSE TO TILT · GOLD PIN = EXP LANER · LANE RUNS BLUE BASE (BOTTOM-LEFT) → RED BASE (TOP-RIGHT)</p>
+
+<main>
+
+  <div class="section-head"><span class="num">01</span><h2>What the EXP Lane Is</h2><div class="rule"></div></div>
+  <div class="grid">
+    <div class="card">
+      <h3>Real Position on the Map</h3>
+      <p>The map is a diagonal square with bases in opposite corners. The EXP lane is the outer path running along one edge of that diagonal, connecting the two bases without passing through the center jungle or river.</p>
+    </div>
+    <div class="card">
+      <h3>Why "EXP"</h3>
+      <p>Minion waves here are farmed almost entirely solo, so all the experience from kills goes to one hero instead of being split. That hero levels up faster than anyone else on the team, hence the lane's name.</p>
+    </div>
+    <div class="card">
+      <h3>Who Goes There</h3>
+      <p>One player, alone, for the entire early game. No support, no jungler lingering — just the laner, the minion wave, and whoever the enemy sends to match them.</p>
+    </div>
+    <div class="card">
+      <h3>Nearby Objective</h3>
+      <p>The Turtle spawns in the jungle pocket just off this lane's edge. Whoever wins their 1v1 early usually gets to shove the wave and rotate in to secure or contest it.</p>
+    </div>
+  </div>
+
+  <div class="section-head"><span class="num">02</span><h2>Heroes Who Belong Here</h2><div class="rule"></div></div>
+  <p style="color:var(--text-dim); font-size:14px; margin-bottom:16px;">Tap a name to see why they excel in the EXP lane and their most recent balance change.</p>
+  <div class="hero-list" id="heroList">
+    <button class="hero-chip" data-hero="Yu Zhong"><div class="role">Fighter</div><div class="name">Yu Zhong</div></button>
+    <button class="hero-chip" data-hero="Lapu-Lapu"><div class="role">Fighter</div><div class="name">Lapu-Lapu</div></button>
+    <button class="hero-chip" data-hero="Terizla"><div class="role">Fighter</div><div class="name">Terizla</div></button>
+    <button class="hero-chip" data-hero="Paquito"><div class="role">Fighter</div><div class="name">Paquito</div></button>
+    <button class="hero-chip" data-hero="Thamuz"><div class="role">Fighter</div><div class="name">Thamuz</div></button>
+    <button class="hero-chip" data-hero="Khufra"><div class="role">Tank</div><div class="name">Khufra</div></button>
+    <button class="hero-chip" data-hero="Esmeralda"><div class="role">Tank</div><div class="name">Esmeralda</div></button>
+    <button class="hero-chip" data-hero="Uranus"><div class="role">Tank</div><div class="name">Uranus</div></button>
+  </div>
+
+  <div class="hero-detail" id="heroDetail">
+    <div class="hero-detail-top">
+      <div class="hero-avatar" id="heroAvatar">Y</div>
+      <div>
+        <div class="role-tag" id="heroRole">Fighter</div>
+        <h3 id="heroName">Yu Zhong</h3>
+      </div>
+    </div>
+    <div class="hero-detail-grid">
+      <div class="hero-detail-block why">
+        <h4>Why Exp Lane</h4>
+        <p id="heroWhy"></p>
+      </div>
+      <div class="hero-detail-block nerf">
+        <h4>Latest Balance Change</h4>
+        <p id="heroNerf"></p>
+      </div>
+    </div>
+    <div class="hero-detail-note">MLBB rebalances roughly every two weeks — this reflects the most recent patch available and may shift by the time you read it.</div>
+  </div>
+  <div class="grid" style="margin-top:16px;">
+    <div class="card">
+      <h3>Why Fighters &amp; Tanks</h3>
+      <p>Both classes are built to survive a 1v1 with no backup: high base durability, sustain, or damage that scales off levels and items gained through solo farm. They need to win lane on their own merit, not on rotations.</p>
+    </div>
+    <div class="card">
+      <h3>The Trade-Off</h3>
+      <p>Because the exp laner is isolated, they're vulnerable to being ganked by the enemy jungler cutting across from the river. A good exp laner always tracks whether the enemy jungler is missing from the map.</p>
+    </div>
+  </div>
+
+  <div class="section-head"><span class="num">03</span><h2>How the Lane Plays Out</h2><div class="rule"></div></div>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="time">00:00 – 03:00</div>
+      <h4>Laning Phase</h4>
+      <p>Both exp laners farm the minion wave for gold and experience, trading hits or pokes when it's safe. Priority is last-hitting minions and not overextending near the enemy tower.</p>
+    </div>
+    <div class="tl-item">
+      <div class="time">~03:00</div>
+      <h4>First Turtle Spawn</h4>
+      <p>Whoever is ahead in lane pushes the wave into the enemy tower, then cuts through the jungle pocket to help secure the Turtle — a small buff objective that grants team-wide gold and experience.</p>
+    </div>
+    <div class="tl-item">
+      <div class="time">05:00 – 12:00</div>
+      <h4>Split &amp; Rotate</h4>
+      <p>Once minion waves grow big enough to threaten towers alone, the exp laner alternates between farming, taking their own turret, and rotating through the river toward mid or Lord setups.</p>
+    </div>
+    <div class="tl-item">
+      <div class="time">12:00+</div>
+      <h4>Team Fight Phase</h4>
+      <p>The exp laner, now a fully-itemized frontline or bruiser, joins the team for Lord contests near the enemy base and team fights, using the level and gold lead built up in lane to dive or tank for the squad.</p>
+    </div>
+  </div>
+
+  <div class="section-head"><span class="num">04</span><h2>Reading the 3D Map Above</h2><div class="rule"></div></div>
+  <div class="grid">
+    <div class="card">
+      <h3>Corner Bases</h3>
+      <p>Blue base sits bottom-left, Red base top-right — mirror images of each other, each guarded by its own set of towers on every lane leading in.</p>
+    </div>
+    <div class="card">
+      <h3>Gold Towers vs Orange Towers</h3>
+      <p>Gold-bordered towers guard the Blue side approach; orange-bordered towers guard the Red side. Tower 1 falls first, then Tower 2, then the Inhibitor closest to base.</p>
+    </div>
+    <div class="card">
+      <h3>Diagonal River</h3>
+      <p>Cuts through the center of the map, separating the two jungles and giving junglers and roamers a fast path to gank either lane, including the exp laner.</p>
+    </div>
+    <div class="card">
+      <h3>Turtle &amp; Lord</h3>
+      <p>Turtle sits in the jungle pocket nearest the EXP lane's edge; Lord spawns later near the enemy's side of the river — both are why the exp laner's rotations matter so much.</p>
+    </div>
+    <div class="card">
+      <h3>Purple Monster Camps</h3>
+      <p>Small jungle camps sit just off the lane on both sides. An exp laner who's shoved their wave can clear one for extra gold, or leave them for their jungler to save time on a clear.</p>
+    </div>
+    <div class="card">
+      <h3>Teal Minion Wave</h3>
+      <p>The animated dots crawling up the lane represent the minion wave marching toward the enemy turret — the thing the exp laner spends the whole early game managing.</p>
+    </div>
+  </div>
+
+</main>
+
+<footer>MOBILE LEGENDS: BANG BANG — a Moonton property. Fan-made educational visualization.</footer>
+
+<script>
+  const wrap = document.getElementById('sceneWrap');
+  const stage = document.getElementById('stage');
+  const baseX = 55, baseZRot = 45;
+
+  wrap.addEventListener('mousemove', (e) => {
+    const rect = wrap.getBoundingClientRect();
+    const px = (e.clientX - rect.left) / rect.width - 0.5;
+    const py = (e.clientY - rect.top) / rect.height - 0.5;
+    const rotX = baseX - py * 12;
+    const rotZ = baseZRot + px * 12;
+    stage.style.transform = `rotateX(${rotX}deg) rotateZ(${rotZ}deg)`;
+  });
+
+  wrap.addEventListener('mouseleave', () => {
+    stage.style.transform = `rotateX(${baseX}deg) rotateZ(${baseZRot}deg)`;
+  });
+
+  document.querySelector('.hero-pin').addEventListener('click', () => {
+    alert('Exp Laner: solo-farms this edge lane, wins the 1v1, and becomes the frontline for late-game fights near the Lord pit.');
+  });
+
+  // ===== Hero detail panel =====
+  const heroData = {
+    "Yu Zhong": {
+      role: "Fighter",
+      why: "His Dragonoid form turns a normal duel into a sustained brawl — heavy lifesteal and armor let him out-trade almost any exp match-up, and his ultimate doubles as a gap-closer and an escape, so he rarely loses a fight he starts.",
+      nerf: "The most recent balance pass removed his self-damage-to-nearby-enemies on entering Dragonoid form and limited his knockback to hit each target only once — softening his teamfight impact without touching his core 1v1 identity."
+    },
+    "Lapu-Lapu": {
+      role: "Fighter",
+      why: "His dual-stance kit covers both close-range brawling and mid-range poke, so opponents can't simply out-range or out-melee him — whichever stance he's in punishes the wrong approach.",
+      nerf: "His recent resurgence came mostly from anti-heal item changes elsewhere in the game rather than a direct buff to his own kit, so he hasn't needed a nerf — though a high win rate usually draws developer attention eventually."
+    },
+    "Terizla": {
+      role: "Fighter",
+      why: "A massive AoE ultimate lets him clear waves in seconds and soft-control anyone caught in it, giving him one of the strongest split-push and turret-siege profiles of any exp laner.",
+      nerf: "He was hit in a recent balance pass alongside Hayabusa, Hylos, and Roger, trimming his damage output to rein in how dominant his wave clear and turret pressure had become."
+    },
+    "Paquito": {
+      role: "Fighter",
+      why: "His passive combo damage snowballs fast off solo kills, and his mobility tools let him punish an opponent who overextends even with no jungler nearby to back him up.",
+      nerf: "His mobility was slightly reduced and his Skill 2 cooldown lengthened, making it harder for him to reset a duel back-to-back — a direct answer to how often he could re-engage."
+    },
+    "Thamuz": {
+      role: "Fighter",
+      why: "His passive converts damage dealt into cooldown reduction and lifesteal, so the longer he fights alone in lane, the stronger he gets — he's built for exactly the isolation this lane demands.",
+      nerf: "He actually received a late-game sustain buff most recently rather than a nerf, a sign developers see him as underperforming compared to other exp picks rather than overtuned."
+    },
+    "Khufra": {
+      role: "Tank",
+      why: "Bouncing Ball works as both an engage and an escape, letting him dictate the pace of a 1v1 even against heroes that outrange him, then follow up with a knockup that locks the fight in his favor.",
+      nerf: "No major recent nerf on record — with several other exp-lane tanks getting buffed to offset overtuned jungle tanks, he's currently more likely to see support than cuts."
+    },
+    "Esmeralda": {
+      role: "Tank",
+      why: "Her shield stacking and Force of Shattering combo let her clear waves safely while still punishing anyone who dives her, and she's genuinely hard to burst down in a straight lane fight.",
+      nerf: "The opposite of a nerf recently — she was one of several underused exp and jungle tanks buffed in the July 2026 mid-season patch to compensate for other tank junglers being reined in."
+    },
+    "Uranus": {
+      role: "Tank",
+      why: "Passive HP regeneration that scales with missing health makes him a nightmare to finish off in a prolonged solo lane — he simply outlasts most trades.",
+      nerf: "No recent nerf on record; he tends to cycle in and out of the meta based on broader tank balance shifts rather than direct hits to his own kit."
+    }
+  };
+
+  const heroList = document.getElementById('heroList');
+  const heroDetail = document.getElementById('heroDetail');
+  const heroAvatar = document.getElementById('heroAvatar');
+  const heroRole = document.getElementById('heroRole');
+  const heroName = document.getElementById('heroName');
+  const heroWhy = document.getElementById('heroWhy');
+  const heroNerf = document.getElementById('heroNerf');
+
+  heroList.addEventListener('click', (e) => {
+    const btn = e.target.closest('.hero-chip');
+    if (!btn) return;
+    const name = btn.dataset.hero;
+    const data = heroData[name];
+    if (!data) return;
+
+    heroList.querySelectorAll('.hero-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+
+    heroAvatar.textContent = name.charAt(0);
+    heroRole.textContent = data.role;
+    heroName.textContent = name;
+    heroWhy.textContent = data.why;
+    heroNerf.textContent = data.nerf;
+
+    heroDetail.classList.add('open');
+    if (window.innerWidth < 900) {
+      heroDetail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  });
+</script>
+
+</body>
+</html>
