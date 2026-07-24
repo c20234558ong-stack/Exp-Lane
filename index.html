@@ -36,119 +36,156 @@
   }
   .subtitle{ max-width:640px; margin:18px auto 0; color:var(--text-dim); font-size:16px; line-height:1.6; }
 
-  /* ===== 3D SCENE — diagonal battlefield, corner bases ===== */
+  /* ===== 3D SCENE ===== */
   .scene-wrap{
-    position:relative; z-index:2; height:min(82vh,680px); margin:20px auto 8px;
-    display:flex; align-items:center; justify-content:center; perspective:1600px;
+    position:relative; z-index:2; height:min(86vh,720px); margin:20px auto 8px;
+    display:flex; align-items:center; justify-content:center; perspective:1800px;
   }
   .stage{
-    width:720px; max-width:92vw; height:720px; max-height:92vw;
+    width:640px; max-width:92vw; height:640px; max-height:92vw;
     position:relative; transform-style:preserve-3d;
-    transform:rotateX(55deg) rotateZ(45deg);
+    transform:rotateX(58deg) rotateZ(45deg);
     transition:transform .15s ease-out;
   }
-  .board{
-    position:absolute; inset:0; border-radius:22px;
-    background:
-      radial-gradient(circle at 15% 85%, rgba(46,217,195,.10), transparent 42%),
-      radial-gradient(circle at 85% 15%, rgba(255,107,74,.10), transparent 42%),
-      linear-gradient(135deg,#2A3B22 0%,#34492A 45%,#3B5230 100%);
-    border:6px solid #17240F;
-    box-shadow:0 0 90px rgba(0,0,0,.6) inset;
-  }
 
-  /* diagonal river, corner to corner-ish through middle */
+  /* ground plate — sits below the board for a real drop-shadow / thickness feel */
+  .ground{
+    position:absolute; inset:-40px; border-radius:26px;
+    background:#04070D; transform:translateZ(-26px);
+    box-shadow:0 0 140px rgba(0,0,0,.9);
+  }
+  .board{
+    position:absolute; inset:0; border-radius:20px;
+    background:
+      radial-gradient(circle at 12% 88%, rgba(46,217,195,.14), transparent 40%),
+      radial-gradient(circle at 88% 12%, rgba(255,107,74,.14), transparent 40%),
+      linear-gradient(135deg,#233B1E 0%,#2E4A26 45%,#37572D 100%);
+    border:5px solid #101A0B;
+    box-shadow:0 0 90px rgba(0,0,0,.6) inset;
+    transform:translateZ(0px);
+  }
+  /* thickness — thin strips along two edges to fake extruded slab depth */
+  .board-edge{ position:absolute; background:#0D1509; }
+  .board-edge.right{ right:-5px; top:0; width:5px; height:100%; transform:rotateY(90deg) translateZ(2.5px); transform-origin:right; }
+  .board-edge.bottom{ left:0; bottom:-5px; width:100%; height:5px; transform:rotateX(-90deg) translateZ(2.5px); transform-origin:bottom; }
+
+  /* diagonal river through the center */
   .river{
-    position:absolute; left:8%; right:8%; top:44%; height:12%;
-    background:linear-gradient(90deg,#123047,#1B4A66 50%,#123047);
-    box-shadow:0 0 40px rgba(46,217,195,.25) inset;
-    transform:rotateZ(-45deg) translateZ(6px);
+    position:absolute; left:2%; right:2%; top:47%; height:9%;
+    background:linear-gradient(90deg,#0F2B40,#1B4A66 50%,#0F2B40);
+    box-shadow:0 0 40px rgba(46,217,195,.3) inset, 0 3px 0 rgba(0,0,0,.4);
+    transform:rotateZ(-45deg) translateZ(3px);
     border-radius:40px;
   }
-
-  /* EXP lane path — runs along the top-left edge, corner to corner */
-  .exp-lane{
-    position:absolute; width:15%; height:120%;
-    left:6%; top:-10%;
-    background:linear-gradient(180deg, rgba(240,194,75,.10), rgba(46,217,195,.14));
-    transform:rotateZ(45deg) translateZ(4px);
-    transform-origin:top center;
-    border-left:2px dashed rgba(240,194,75,.4);
-    border-right:2px dashed rgba(240,194,75,.4);
+  .river-glow{
+    position:absolute; left:2%; right:2%; top:50%; height:1px;
+    background:linear-gradient(90deg,transparent,rgba(46,217,195,.6),transparent);
+    transform:rotateZ(-45deg) translateZ(4px);
   }
 
-  /* gold lane path, dimmer — mirrored edge */
-  .gold-lane{
-    position:absolute; width:15%; height:120%;
-    right:6%; top:-10%;
-    background:linear-gradient(180deg, rgba(255,107,74,.06), rgba(46,217,195,.06));
-    transform:rotateZ(-45deg) translateZ(4px);
+  /* EXP lane path — highlighted, outer edge */
+  .exp-lane{
+    position:absolute; width:14%; height:124%;
+    left:4%; top:-12%;
+    background:linear-gradient(180deg, rgba(240,194,75,.16), rgba(46,217,195,.20));
+    transform:rotateZ(45deg) translateZ(2px);
     transform-origin:top center;
-    border-left:2px dashed rgba(255,255,255,.12);
-    border-right:2px dashed rgba(255,255,255,.12);
-    opacity:.55;
+    border-left:2px dashed rgba(240,194,75,.5);
+    border-right:2px dashed rgba(240,194,75,.5);
+    box-shadow:0 0 30px rgba(240,194,75,.08) inset;
+  }
+  /* mid lane — dimmer, straight diagonal through center */
+  .mid-lane{
+    position:absolute; width:9%; height:150%;
+    left:45.5%; top:-25%;
+    background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.08));
+    transform:rotateZ(45deg) translateZ(1px);
+    transform-origin:top center;
+    border-left:1px dashed rgba(255,255,255,.1);
+    border-right:1px dashed rgba(255,255,255,.1);
+    opacity:.5;
+  }
+  /* gold lane — dimmer, mirrored outer edge */
+  .gold-lane{
+    position:absolute; width:14%; height:124%;
+    right:4%; top:-12%;
+    background:linear-gradient(180deg, rgba(255,107,74,.06), rgba(46,217,195,.06));
+    transform:rotateZ(-45deg) translateZ(2px);
+    transform-origin:top center;
+    border-left:2px dashed rgba(255,255,255,.1);
+    border-right:2px dashed rgba(255,255,255,.1);
+    opacity:.45;
   }
 
   .grass{
-    position:absolute; width:70px; height:70px; border-radius:10px;
-    background:radial-gradient(ellipse at 50% 50%,#2E5232,#1D3A20 70%);
-    box-shadow:0 0 0 2px rgba(46,217,195,.15) inset;
-    transform:translateZ(3px);
+    position:absolute; width:64px; height:64px; border-radius:8px;
+    background:radial-gradient(ellipse at 50% 50%,#31572F,#1D3A20 70%);
+    box-shadow:0 0 0 2px rgba(46,217,195,.15) inset, 0 6px 0 -3px rgba(0,0,0,.4);
+    transform:translateZ(2px);
   }
-  .g1{ left:18%; top:16%; } .g2{ left:30%; top:8%; }
-  .g3{ left:8%; top:38%; }  .g4{ left:60%; top:74%; }
-  .g5{ left:70%; top:60%; } .g6{ left:78%; top:82%; }
+  .g1{ left:16%; top:14%; } .g2{ left:29%; top:6%; }
+  .g3{ left:6%; top:36%; }  .g4{ left:62%; top:76%; }
+  .g5{ left:73%; top:62%; } .g6{ left:80%; top:84%; }
 
-  .base{
-    position:absolute; width:120px; height:120px; border-radius:50%;
-    transform:translateZ(14px);
-  }
-  .base.blue{ left:-6%; bottom:-6%; background:radial-gradient(circle,rgba(46,217,195,.5),transparent 70%); }
-  .base.red{ right:-6%; top:-6%; background:radial-gradient(circle,rgba(255,107,74,.5),transparent 70%); }
+  /* base — layered rings to fake a raised platform */
+  .base{ position:absolute; width:150px; height:150px; }
+  .base .ring{ position:absolute; inset:0; border-radius:50%; }
+  .base.blue{ left:-8%; bottom:-8%; }
+  .base.red{ right:-8%; top:-8%; }
+  .base.blue .ring1{ background:radial-gradient(circle,rgba(46,217,195,.55),transparent 70%); transform:translateZ(2px); }
+  .base.blue .ring2{ background:radial-gradient(circle,rgba(46,217,195,.35),transparent 65%); transform:translateZ(10px); width:70%; height:70%; left:15%; top:15%; }
+  .base.red .ring1{ background:radial-gradient(circle,rgba(255,107,74,.5),transparent 70%); transform:translateZ(2px); }
+  .base.red .ring2{ background:radial-gradient(circle,rgba(255,107,74,.32),transparent 65%); transform:translateZ(10px); width:70%; height:70%; left:15%; top:15%; }
   .base-label{
-    position:absolute; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.08em;
-    transform:translateZ(16px);
+    position:absolute; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.1em;
+    transform:translateZ(20px);
   }
-  .base-label.blue{ left:-2%; bottom:2%; color:var(--teal); }
-  .base-label.red{ right:-2%; top:2%; color:var(--danger); }
+  .base-label.blue{ left:-2%; bottom:3%; color:var(--teal); }
+  .base-label.red{ right:-2%; top:3%; color:var(--danger); }
 
-  .turret{
-    position:absolute; width:34px; height:34px; transform-style:preserve-3d; transform:translateZ(30px);
+  /* ===== extruded 3D turrets — stacked slabs for real height ===== */
+  .turret{ position:absolute; width:30px; height:30px; transform-style:preserve-3d; }
+  .turret .slab{
+    position:absolute; inset:0; border:2px solid var(--gold); border-radius:5px;
+    background:linear-gradient(145deg,#3E4E72,#202B45);
   }
-  .turret .body{
-    width:100%; height:100%; border-radius:6px;
-    background:linear-gradient(145deg,#3A4A6B,#1C2740);
-    border:2px solid var(--gold);
-    box-shadow:0 0 18px rgba(240,194,75,.45),0 14px 0 -5px rgba(0,0,0,.5);
+  .turret .slab.s1{ transform:translateZ(4px); }
+  .turret .slab.s2{ transform:translateZ(14px); opacity:.95; }
+  .turret .slab.s3{ transform:translateZ(24px); opacity:.9; box-shadow:0 0 16px rgba(240,194,75,.5); }
+  .turret .cap{
+    position:absolute; left:50%; top:50%; width:10px; height:10px; margin:-5px;
+    background:var(--gold); border-radius:2px; transform:translateZ(30px);
+    box-shadow:0 0 12px rgba(240,194,75,.8);
   }
-  .turret.enemy .body{ border-color:var(--danger); box-shadow:0 0 18px rgba(255,107,74,.45),0 14px 0 -5px rgba(0,0,0,.5); }
+  .turret.enemy .slab{ border-color:var(--danger); }
+  .turret.enemy .slab.s3{ box-shadow:0 0 16px rgba(255,107,74,.5); }
+  .turret.enemy .cap{ background:var(--danger); box-shadow:0 0 12px rgba(255,107,74,.8); }
   .turret .label{
-    position:absolute; top:-22px; left:50%; transform:translateX(-50%);
+    position:absolute; top:-40px; left:50%; transform:translateX(-50%) translateZ(30px);
     font-family:'JetBrains Mono',monospace; font-size:8px; color:var(--gold); white-space:nowrap;
   }
   .turret.enemy .label{ color:var(--danger); }
 
-  /* EXP lane turrets — placed along the true diagonal edge, corner to corner */
-  .et1{ left:16%; bottom:24%; }
-  .et2{ left:23%; bottom:37%; }
-  .eti{ left:30%; bottom:50%; }
-  .er1{ left:64%; top:24%; }
-  .er2{ left:57%; top:37%; }
-  .eri{ left:50%; top:50%; }
+  .et1{ left:15%; bottom:26%; }
+  .et2{ left:22%; bottom:39%; }
+  .eti{ left:29%; bottom:52%; }
+  .er1{ left:65%; top:26%; }
+  .er2{ left:58%; top:39%; }
+  .eri{ left:51%; top:52%; }
 
-  /* jungle monster camps, one pocket per side */
+  /* jungle monster camps */
   .camp{
-    position:absolute; width:26px; height:26px; border-radius:50%; transform:translateZ(16px);
+    position:absolute; width:24px; height:24px; border-radius:50%; transform:translateZ(14px);
     background:radial-gradient(circle at 35% 30%,#C9A6FF,#6B3FA0 65%);
-    box-shadow:0 0 14px rgba(155,110,230,.55),0 10px 6px -5px rgba(0,0,0,.5);
+    box-shadow:0 0 14px rgba(155,110,230,.55),0 8px 6px -5px rgba(0,0,0,.5);
   }
-  .camp.c1{ left:34%; top:70%; }
-  .camp.c2{ left:66%; top:20%; }
+  .camp.c1{ left:36%; top:68%; }
+  .camp.c2{ left:64%; top:22%; }
 
-  /* animated minion wave crawling toward the enemy turret */
-  .wave{ position:absolute; left:20%; bottom:20%; width:14px; height:14px; transform-style:preserve-3d; }
+  /* animated minion wave */
+  .wave{ position:absolute; left:19%; bottom:19%; width:14px; height:14px; transform-style:preserve-3d; }
   .wave .unit{
-    position:absolute; width:10px; height:10px; border-radius:50%; transform:translateZ(12px);
+    position:absolute; width:9px; height:9px; border-radius:50%; transform:translateZ(10px);
     background:radial-gradient(circle,#9AF0E2,#1D9C8A);
     box-shadow:0 0 8px rgba(46,217,195,.6);
     animation: march 6s linear infinite;
@@ -157,47 +194,47 @@
   .wave .unit:nth-child(3){ animation-delay:-2s; }
   @keyframes march{
     0%{ left:0%; bottom:0%; }
-    100%{ left:44%; bottom:44%; }
+    100%{ left:46%; bottom:46%; }
   }
 
   .turtle-marker, .jungle-marker, .lord-marker{
-    position:absolute; width:56px; height:56px; border-radius:50%;
+    position:absolute; width:52px; height:52px; border-radius:50%;
     display:flex; align-items:center; justify-content:center; text-align:center;
-    font-family:'JetBrains Mono',monospace; font-size:8px; transform:translateZ(10px);
+    font-family:'JetBrains Mono',monospace; font-size:8px; transform:translateZ(6px);
   }
   .turtle-marker{
-    left:24%; top:60%; color:var(--gold);
+    left:26%; top:58%; color:var(--gold);
     background:radial-gradient(circle,rgba(240,194,75,.25),rgba(240,194,75,.05));
     border:1px dashed rgba(240,194,75,.5);
   }
   .lord-marker{
-    left:60%; top:28%; color:var(--danger);
+    left:58%; top:30%; color:var(--danger);
     background:radial-gradient(circle,rgba(255,107,74,.22),rgba(255,107,74,.05));
     border:1px dashed rgba(255,107,74,.5);
   }
   .jungle-marker{
-    left:12%; top:60%; color:var(--teal);
+    left:14%; top:58%; color:var(--teal);
     background:radial-gradient(circle,rgba(46,217,195,.2),rgba(46,217,195,.05));
     border:1px dashed rgba(46,217,195,.5);
   }
 
   .hero-pin{
-    position:absolute; left:22%; bottom:34%; width:30px; height:30px; border-radius:50%;
+    position:absolute; left:23%; bottom:36%; width:26px; height:26px; border-radius:50%;
     background:radial-gradient(circle at 35% 30%,#FFEBB8,var(--gold) 60%,#7A5B12);
-    box-shadow:0 0 22px rgba(240,194,75,.7),0 18px 8px -6px rgba(0,0,0,.6);
-    transform:translateZ(44px);
+    box-shadow:0 0 22px rgba(240,194,75,.7),0 16px 8px -6px rgba(0,0,0,.6);
+    transform:translateZ(40px);
     animation:float 3s ease-in-out infinite; cursor:pointer;
   }
-  @keyframes float{ 0%,100%{ transform:translateZ(44px);} 50%{ transform:translateZ(64px);} }
+  @keyframes float{ 0%,100%{ transform:translateZ(40px);} 50%{ transform:translateZ(58px);} }
 
   .compass{
-    position:absolute; left:50%; top:-40px; transform:translateX(-50%) translateZ(2px);
+    position:absolute; left:50%; top:-44px; transform:translateX(-50%) translateZ(2px);
     font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-dim); letter-spacing:.15em;
   }
 
   .hint{
     position:relative; z-index:2; text-align:center; font-family:'JetBrains Mono',monospace; font-size:11px;
-    color:var(--text-dim); letter-spacing:.1em; margin-top:-6px; margin-bottom:36px;
+    color:var(--text-dim); letter-spacing:.1em; margin-top:-6px; margin-bottom:14px;
   }
   .legend{
     position:relative; z-index:2; display:flex; gap:20px; justify-content:center; flex-wrap:wrap;
@@ -208,6 +245,14 @@
   .dot.gold{ background:var(--gold); box-shadow:0 0 6px var(--gold); }
   .dot.danger{ background:var(--danger); box-shadow:0 0 6px var(--danger); }
   .dot.teal{ background:var(--teal); box-shadow:0 0 6px var(--teal); }
+
+  /* toggle: swap the CSS diagram for an uploaded reference photo */
+  .swap-note{
+    position:relative; z-index:2; text-align:center; margin:22px auto 0; max-width:560px;
+    font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); line-height:1.7;
+    border:1px dashed var(--panel-edge); border-radius:10px; padding:14px 18px;
+  }
+  .swap-note b{ color:var(--teal); }
 
   main{ position:relative; z-index:2; max-width:1080px; margin:0 auto; padding:20px 24px 100px; }
   .section-head{ display:flex; align-items:baseline; gap:14px; margin:64px 0 22px; }
@@ -251,10 +296,20 @@
   .hero-avatar{
     width:56px; height:56px; border-radius:50%; flex-shrink:0;
     display:flex; align-items:center; justify-content:center;
-    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:22px; color:#0A0F1C;
     background:radial-gradient(circle at 35% 30%,#FFEBB8,var(--gold) 60%,#7A5B12);
     box-shadow:0 0 18px rgba(240,194,75,.5);
+    transition:background .2s ease, box-shadow .2s ease;
   }
+  .hero-avatar svg{ width:32px; height:32px; overflow:visible; }
+  .hero-avatar.has-photo{ background-size:cover; background-position:center 20%; }
+  .hero-avatar.av-yuzhong{ background:radial-gradient(circle at 35% 30%,#FF9A82,#C23B2A 65%,#5C130A); box-shadow:0 0 18px rgba(255,107,74,.55); }
+  .hero-avatar.av-lapulapu{ background:radial-gradient(circle at 35% 30%,#FFE3A8,#C68A2E 65%,#5C3D0C); box-shadow:0 0 18px rgba(240,194,75,.5); }
+  .hero-avatar.av-terizla{ background:radial-gradient(circle at 35% 30%,#C9D3E4,#5C6B85 65%,#232C3B); box-shadow:0 0 18px rgba(140,160,190,.5); }
+  .hero-avatar.av-paquito{ background:radial-gradient(circle at 35% 30%,#FFC9A8,#D9622E 65%,#5C1F0A); box-shadow:0 0 18px rgba(255,140,80,.5); }
+  .hero-avatar.av-thamuz{ background:radial-gradient(circle at 35% 30%,#E7B8FF,#7A2E9E 65%,#2E0C42); box-shadow:0 0 18px rgba(180,80,220,.5); }
+  .hero-avatar.av-khufra{ background:radial-gradient(circle at 35% 30%,#FFEBB8,#D9A63C 65%,#5C4210); box-shadow:0 0 18px rgba(240,194,75,.5); }
+  .hero-avatar.av-esmeralda{ background:radial-gradient(circle at 35% 30%,#B8FFE3,#2E9E6B 65%,#0C4228); box-shadow:0 0 18px rgba(46,217,150,.5); }
+  .hero-avatar.av-uranus{ background:radial-gradient(circle at 35% 30%,#B8D4FF,#2E5E9E 65%,#0C2442); box-shadow:0 0 18px rgba(46,140,217,.5); }
   .hero-detail-top h3{ font-family:'Rajdhani',sans-serif; font-size:26px; font-weight:700; }
   .hero-detail-top .role-tag{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--teal); letter-spacing:.08em; text-transform:uppercase; }
   .hero-detail-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:20px; }
@@ -278,9 +333,9 @@
 <div class="noise"></div>
 
 <header>
-  <div class="eyebrow">Mobile Legends: Bang Bang — Map Study, v2</div>
+  <div class="eyebrow">Mobile Legends: Bang Bang — Map Study, v3</div>
   <h1>THE EXP LANE</h1>
-  <p class="subtitle">Redrawn to match the real battlefield: bases sit in opposite corners, the river cuts diagonally through the jungle, and the EXP lane runs the outer edge connecting them. Tilt with your mouse to look across the map.</p>
+  <p class="subtitle">A true isometric build: bases sit in opposite corners, the river cuts diagonally through the jungle, and every turret is stacked in real 3D so height reads correctly as you tilt the board.</p>
 </header>
 
 <div class="legend">
@@ -291,10 +346,15 @@
 
 <div class="scene-wrap" id="sceneWrap">
   <div class="stage" id="stage">
+    <div class="ground"></div>
     <div class="board">
+      <div class="board-edge right"></div>
+      <div class="board-edge bottom"></div>
       <div class="compass">N ↑ EXP LANE EDGE</div>
       <div class="river"></div>
+      <div class="river-glow"></div>
       <div class="exp-lane"></div>
+      <div class="mid-lane"></div>
       <div class="gold-lane"></div>
 
       <div class="grass g1"></div>
@@ -304,18 +364,18 @@
       <div class="grass g5"></div>
       <div class="grass g6"></div>
 
-      <div class="base blue"></div>
-      <div class="base red"></div>
+      <div class="base blue"><div class="ring ring1"></div><div class="ring ring2"></div></div>
+      <div class="base red"><div class="ring ring1"></div><div class="ring ring2"></div></div>
       <div class="base-label blue">BLUE BASE</div>
       <div class="base-label red">RED BASE</div>
 
-      <div class="turret et1"><div class="label">TOWER 1</div><div class="body"></div></div>
-      <div class="turret et2"><div class="label">TOWER 2</div><div class="body"></div></div>
-      <div class="turret eti"><div class="label">INHIBITOR</div><div class="body"></div></div>
+      <div class="turret et1"><div class="label">TOWER 1</div><div class="slab s1"></div><div class="slab s2"></div><div class="slab s3"></div><div class="cap"></div></div>
+      <div class="turret et2"><div class="label">TOWER 2</div><div class="slab s1"></div><div class="slab s2"></div><div class="slab s3"></div><div class="cap"></div></div>
+      <div class="turret eti"><div class="label">INHIBITOR</div><div class="slab s1"></div><div class="slab s2"></div><div class="slab s3"></div><div class="cap"></div></div>
 
-      <div class="turret enemy er1"><div class="label">TOWER 1</div><div class="body"></div></div>
-      <div class="turret enemy er2"><div class="label">TOWER 2</div><div class="body"></div></div>
-      <div class="turret enemy eri"><div class="label">INHIBITOR</div><div class="body"></div></div>
+      <div class="turret enemy er1"><div class="label">TOWER 1</div><div class="slab s1"></div><div class="slab s2"></div><div class="slab s3"></div><div class="cap"></div></div>
+      <div class="turret enemy er2"><div class="label">TOWER 2</div><div class="slab s1"></div><div class="slab s2"></div><div class="slab s3"></div><div class="cap"></div></div>
+      <div class="turret enemy eri"><div class="label">INHIBITOR</div><div class="slab s1"></div><div class="slab s2"></div><div class="slab s3"></div><div class="cap"></div></div>
 
       <div class="turtle-marker">TURTLE</div>
       <div class="lord-marker">LORD</div>
@@ -334,6 +394,7 @@
   </div>
 </div>
 <p class="hint">↕ MOUSE TO TILT · GOLD PIN = EXP LANER · LANE RUNS BLUE BASE (BOTTOM-LEFT) → RED BASE (TOP-RIGHT)</p>
+<div class="swap-note">Want the real in-game map here instead of this CSS build? Upload a screenshot of the MLBB map and I'll drop it in as a textured ground plane in this same 3D stage, in place of the drawn board above.</div>
 
 <main>
 
@@ -372,7 +433,7 @@
 
   <div class="hero-detail" id="heroDetail">
     <div class="hero-detail-top">
-      <div class="hero-avatar" id="heroAvatar">Y</div>
+      <div class="hero-avatar av-yuzhong" id="heroAvatar"></div>
       <div>
         <div class="role-tag" id="heroRole">Fighter</div>
         <h3 id="heroName">Yu Zhong</h3>
@@ -432,8 +493,8 @@
       <p>Blue base sits bottom-left, Red base top-right — mirror images of each other, each guarded by its own set of towers on every lane leading in.</p>
     </div>
     <div class="card">
-      <h3>Gold Towers vs Orange Towers</h3>
-      <p>Gold-bordered towers guard the Blue side approach; orange-bordered towers guard the Red side. Tower 1 falls first, then Tower 2, then the Inhibitor closest to base.</p>
+      <h3>Stacked Towers</h3>
+      <p>Each turret is built from three layered slabs, so it actually rises off the board when the camera tilts, instead of sitting flat like a sticker. Gold-bordered towers guard Blue's approach; orange guards Red's.</p>
     </div>
     <div class="card">
       <h3>Diagonal River</h3>
@@ -460,20 +521,28 @@
 <script>
   const wrap = document.getElementById('sceneWrap');
   const stage = document.getElementById('stage');
-  const baseX = 55, baseZRot = 45;
+  const baseX = 58, baseZRot = 45;
 
   wrap.addEventListener('mousemove', (e) => {
     const rect = wrap.getBoundingClientRect();
     const px = (e.clientX - rect.left) / rect.width - 0.5;
     const py = (e.clientY - rect.top) / rect.height - 0.5;
-    const rotX = baseX - py * 12;
-    const rotZ = baseZRot + px * 12;
+    const rotX = baseX - py * 14;
+    const rotZ = baseZRot + px * 14;
     stage.style.transform = `rotateX(${rotX}deg) rotateZ(${rotZ}deg)`;
   });
 
   wrap.addEventListener('mouseleave', () => {
     stage.style.transform = `rotateX(${baseX}deg) rotateZ(${baseZRot}deg)`;
   });
+
+  document.getElementById('heroAvatar').innerHTML = `<svg viewBox="0 0 56 56">
+      <path d="M10 52 C10 36 18 30 28 30 C38 30 46 36 46 52 Z" fill="#3A0B04"/>
+      <circle cx="28" cy="21" r="10.5" fill="#4A0F06"/>
+      <path d="M19 15 C19 9 24 5 28 6 C24 8 22 13 22 17 Z" fill="#7A1B0A"/>
+      <path d="M37 15 C37 9 32 5 28 6 C32 8 34 13 34 17 Z" fill="#7A1B0A"/>
+      <path d="M20 22 Q28 27 36 22" stroke="#FFD9A8" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    </svg>`;
 
   document.querySelector('.hero-pin').addEventListener('click', () => {
     alert('Exp Laner: solo-farms this edge lane, wins the 1v1, and becomes the frontline for late-game fights near the Lord pit.');
@@ -523,6 +592,59 @@
     }
   };
 
+  const heroVisual = {
+    "Yu Zhong": { cls: "av-yuzhong", icon: `<svg viewBox="0 0 56 56">
+      <path d="M10 52 C10 36 18 30 28 30 C38 30 46 36 46 52 Z" fill="#3A0B04"/>
+      <circle cx="28" cy="21" r="10.5" fill="#4A0F06"/>
+      <path d="M19 15 C19 9 24 5 28 6 C24 8 22 13 22 17 Z" fill="#7A1B0A"/>
+      <path d="M37 15 C37 9 32 5 28 6 C32 8 34 13 34 17 Z" fill="#7A1B0A"/>
+      <path d="M20 22 Q28 27 36 22" stroke="#FFD9A8" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    </svg>` },
+    "Lapu-Lapu": { cls: "av-lapulapu", icon: `<svg viewBox="0 0 56 56">
+      <path d="M10 52 C10 36 18 30 28 30 C38 30 46 36 46 52 Z" fill="#3D2705"/>
+      <circle cx="28" cy="21" r="10.5" fill="#4E3208"/>
+      <path d="M15 20 L22 15 L22 27 Z" fill="#8A5A12"/>
+      <path d="M41 20 L34 15 L34 27 Z" fill="#8A5A12"/>
+      <circle cx="28" cy="14" r="3" fill="#FFD98C"/>
+    </svg>` },
+    "Terizla": { cls: "av-terizla", icon: `<svg viewBox="0 0 56 56">
+      <path d="M10 52 C10 36 18 30 28 30 C38 30 46 36 46 52 Z" fill="#232C3B"/>
+      <circle cx="28" cy="21" r="10.5" fill="#2E3A4D"/>
+      <path d="M15 14 C20 8 36 8 41 14 L41 19 L15 19 Z" fill="#5C6B85"/>
+      <rect x="15" y="17" width="26" height="4" fill="#C9D3E4"/>
+    </svg>` },
+    "Paquito": { cls: "av-paquito", icon: `<svg viewBox="0 0 56 56">
+      <path d="M10 52 C10 36 18 30 28 30 C38 30 46 36 46 52 Z" fill="#3A1204"/>
+      <circle cx="28" cy="21" r="10.5" fill="#4E1806"/>
+      <path d="M17 30 C20 26 24 24 28 24 C32 24 36 26 39 30" stroke="#FFB88A" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+      <circle cx="16" cy="34" r="6" fill="#D9622E"/>
+      <circle cx="40" cy="34" r="6" fill="#D9622E"/>
+    </svg>` },
+    "Thamuz": { cls: "av-thamuz", icon: `<svg viewBox="0 0 56 56">
+      <path d="M10 52 C10 36 18 30 28 30 C38 30 46 36 46 52 Z" fill="#2E0C42"/>
+      <circle cx="28" cy="21" r="10.5" fill="#3F1358"/>
+      <path d="M17 17 C22 10 34 10 39 17" stroke="#E7B8FF" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M24 27 C26 24 30 24 32 27" stroke="#FF8A4A" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </svg>` },
+    "Khufra": { cls: "av-khufra", icon: `<svg viewBox="0 0 56 56">
+      <path d="M10 52 C10 36 18 30 28 30 C38 30 46 36 46 52 Z" fill="#3A2604"/>
+      <circle cx="28" cy="21" r="10.5" fill="#4E3308"/>
+      <path d="M15 21 C15 12 22 8 28 8 C34 8 41 12 41 21" fill="none" stroke="#D9A63C" stroke-width="2.4"/>
+      <path d="M20 21 C20 15 24 12 28 12 C32 12 36 15 36 21" fill="none" stroke="#FFE3A0" stroke-width="1.8"/>
+    </svg>` },
+    "Esmeralda": { cls: "av-esmeralda", icon: `<svg viewBox="0 0 56 56">
+      <path d="M10 52 C10 36 18 30 28 30 C38 30 46 36 46 52 Z" fill="#052818"/>
+      <circle cx="28" cy="21" r="10.5" fill="#0A3D24"/>
+      <polygon points="28,9 34,15 31,23 25,23 22,15" fill="#5FE0A6"/>
+    </svg>` },
+    "Uranus": { cls: "av-uranus", icon: `<svg viewBox="0 0 56 56">
+      <path d="M10 52 C10 36 18 30 28 30 C38 30 46 36 46 52 Z" fill="#041428"/>
+      <circle cx="28" cy="21" r="10.5" fill="#0A2D52"/>
+      <ellipse cx="28" cy="21" rx="15" ry="4.5" fill="none" stroke="#8FC4FF" stroke-width="1.8"/>
+      <circle cx="28" cy="21" r="5" fill="#B8D4FF"/>
+    </svg>` }
+  };
+
   const heroList = document.getElementById('heroList');
   const heroDetail = document.getElementById('heroDetail');
   const heroAvatar = document.getElementById('heroAvatar');
@@ -541,7 +663,15 @@
     heroList.querySelectorAll('.hero-chip').forEach(c => c.classList.remove('active'));
     btn.classList.add('active');
 
-    heroAvatar.textContent = name.charAt(0);
+    const visual = heroVisual[name];
+    heroAvatar.className = 'hero-avatar' + (visual ? ' ' + visual.cls : '') + (visual && visual.photo ? ' has-photo' : '');
+    if (visual && visual.photo) {
+      heroAvatar.innerHTML = '';
+      heroAvatar.style.backgroundImage = `url(${visual.photo})`;
+    } else {
+      heroAvatar.style.backgroundImage = '';
+      heroAvatar.innerHTML = visual ? visual.icon : '';
+    }
     heroRole.textContent = data.role;
     heroName.textContent = name;
     heroWhy.textContent = data.why;
